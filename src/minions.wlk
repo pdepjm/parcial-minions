@@ -8,8 +8,8 @@ class Empleado{
 	method rol(){
 		return rol
 	}
-	method realizarTarea(tarea){
-		if(tarea.puedeRealizarla(self).negate()){
+	method realizar(tarea){
+		if(not self.puedeRealizar(tarea)){
 			throw new NoPuedeRealizarTareaError()
 		}
 		rol.realizarPor(self,tarea)
@@ -61,6 +61,12 @@ class Empleado{
 	method experiencia(){
 		return tareasRealizadas.size() * tareasRealizadas.sum({tarea => tarea.dificultadTarea()})
 	}
+	
+	// originalmente la responsabilidad de saber si se puede realizar una tarea
+	// estaba en la tarea, pero como con el capataz es diferente, hay que delegar al rol
+	method puedeRealizar(tarea){
+		return rol.puedeRealizar(self,tarea)
+	}
 }
 
 class Ciclope inherits Empleado{
@@ -101,6 +107,9 @@ class Rol{
 	method realizarPor(emp,tarea){
 		tarea.realizarsePor(emp)
 	}
+	method puedeRealizar(empleado,tarea){
+		return tarea.puedeRealizarla(empleado)
+	}
 }
 
 class Soldado inherits Rol{
@@ -108,7 +117,7 @@ class Soldado inherits Rol{
 	override method fuerzaExtra(){
 		return danio
 	}
-	method defiende(empleado){
+	override method defiende(empleado){
 		danio += 2
 	}
 }
@@ -135,15 +144,28 @@ class Capataz inherits Rol{
 		empleadosACargo = listaEmpleados
 	}
 	override method realizarPor(emp,tarea){
-		var empsQuePuedenRealizarla = empleadosACargo.filter({empl => tarea.puedeRealizarla(empl)})
-		var empleadoMasExp
-		if(empsQuePuedenRealizarla.isEmpty()){
-			tarea.realizarsePor(emp)
+		if(not self.puedoDelegar()){
+			emp.realizar(tarea)
 		}else{
-			empleadoMasExp = empsQuePuedenRealizarla.max({empl => empl.experiencia()})
-			tarea.realizarsePor(empleadoMasExp)
+			self.empleadoMasExperimentado().realizar(tarea)
 		}
 		
+	}
+	
+	method empleadosQuePuedenRealizar(tarea){
+		return empleadosACargo.filter({empl => empl.puedeRealizar(tarea)}
+	}
+	
+	method empleadoMasExperimentado() {
+		return self.empleadosQuePuedenRealizar(tarea).max({empl => empl.experiencia()})
+	}
+	
+	override method puedeRealizar(empleado,tarea){
+		return self.puedoDelegar() or super()
+	}
+	
+	method puedoDelegar(){
+		return self.empleadosQuePuedenRealizar(tarea).isEmpty()
 	}
 }
 
