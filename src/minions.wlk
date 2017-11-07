@@ -37,11 +37,14 @@ class Empleado{
 	method perderMitadDeEstamina(){
 		estamina = estamina/2
 	}
-	method noEsMucama(){
-		return rol.noEsMucama()
+	method puedeDefender(){
+		return rol.puedeDefender()
 	}
-	method noEsSoldado(){
-		return rol.noEsSoldado()
+	method limpiar(estaminaAPerder){
+		self.perderEstamina(rol.cuantoPierdoPorLimpiar(estaminaAPerder))
+	}
+	method defender(){
+		return rol.defiende(self)
 	}
 	method esCiclope(){
 		return false
@@ -83,11 +86,14 @@ class Rol{
 	method tieneEstasHerramientas(listaHerr){
 		return listaHerr.isEmpty()
 	}
-	method noEsMucama(){
+	method puedeDefender(){
 		return true
 	}
-	method noEsSoldado(){
-		return true
+	method cuantoPierdoPorLimpiar(estamina){
+		return estamina
+	}
+	method defiende(empleado){
+		empleado.perderMitadDeEstamina()
 	}
 	method fuerzaExtra(){
 		return 0
@@ -95,19 +101,15 @@ class Rol{
 	method realizarPor(emp,tarea){
 		tarea.realizarsePor(emp)
 	}
-	method incrementarDanio(puntos){}
 }
 
 class Soldado inherits Rol{
 	var danio
-	override method incrementarDanio(puntos){
-		danio += puntos
-	}
 	override method fuerzaExtra(){
 		return danio
 	}
-	override method noEsSoldado(){
-		return false
+	method defiende(empleado){
+		danio += 2
 	}
 }
 
@@ -122,8 +124,8 @@ class Obrero inherits Rol{
 }
 
 class Mucama inherits Rol{
-	override method noEsMucama(){
-		return true
+	method cuantoPierdoPorLimpiar(estamina){
+		return 0
 	}
 }
 
@@ -178,14 +180,10 @@ class DefenderSector{
 		}
 	}
 	method puedeRealizarla(empleado){
-		return empleado.noEsMucama() && empleado.fuerzaMayorA(gradoAmenaza)
+		return empleado.puedeDefender() && empleado.fuerzaMayorA(gradoAmenaza)
 	}
 	method realizarsePor(empleado){
-		if(empleado.noEsSoldado()){
-			empleado.perderMitadDeEstamina()
-		}else{
-			empleado.rol().incrementarDanio(2)
-		}
+		empleado.defender()
 	}
 }
 
@@ -211,9 +209,7 @@ class LimpiarSector{
 		return empleado.estaminaMayorA(self.estaminaRequerida())
 	}
 	method realizarsePor(empleado){
-		if(empleado.noEsMucama()){
-			empleado.perderEstamina(self.estaminaRequerida())
-		}
+		empleado.limpiar(self.estaminaRequerida())
 	}
 }
 
