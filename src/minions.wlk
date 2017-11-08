@@ -133,6 +133,9 @@ class Obrero inherits Rol{
 }
 
 class Mucama inherits Rol{
+	override method puedeDefender(){ 
+		return false
+	}
 	method cuantoPierdoPorLimpiar(estamina){
 		return 0
 	}
