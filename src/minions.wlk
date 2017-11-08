@@ -136,7 +136,7 @@ class Mucama inherits Rol{
 	override method puedeDefender(){ 
 		return false
 	}
-	method cuantoPierdoPorLimpiar(estamina){
+	override method cuantoPierdoPorLimpiar(estamina){
 		return 0
 	}
 }
@@ -147,27 +147,27 @@ class Capataz inherits Rol{
 		empleadosACargo = listaEmpleados
 	}
 	override method realizarPor(emp,tarea){
-		if(not self.puedoDelegar()){
+		if(not self.puedoDelegar(tarea)){
 			emp.realizar(tarea)
 		}else{
-			self.empleadoMasExperimentado().realizar(tarea)
+			self.empleadoMasExperimentado(tarea).realizar(tarea)
 		}
 		
 	}
 	
 	method empleadosQuePuedenRealizar(tarea){
-		return empleadosACargo.filter({empl => empl.puedeRealizar(tarea)}
+		return empleadosACargo.filter({empl => empl.puedeRealizar(tarea)})
 	}
 	
-	method empleadoMasExperimentado() {
+	method empleadoMasExperimentado(tarea) {
 		return self.empleadosQuePuedenRealizar(tarea).max({empl => empl.experiencia()})
 	}
 	
 	override method puedeRealizar(empleado,tarea){
-		return self.puedoDelegar() or super()
+		return self.puedoDelegar(tarea) or super(empleado,tarea)
 	}
 	
-	method puedoDelegar(){
+	method puedoDelegar(tarea){
 		return self.empleadosQuePuedenRealizar(tarea).isEmpty()
 	}
 }
