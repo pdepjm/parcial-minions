@@ -46,8 +46,8 @@ class Empleado{
 	method defender(){
 		return rol.defiende(self)
 	}
-	method esCiclope(){
-		return false
+	method factorMalaPunteria(){
+		return 1
 	}
 	method fuerza(){
 		return estamina/2 + 2
@@ -73,8 +73,8 @@ class Ciclope inherits Empleado{
 	override method recuperarEstamina(puntos){
 		estamina += puntos
 	}
-	override method esCiclope(){
-		return true
+	override method factorMalaPunteria(){
+		return 2
 	}
 	override method fuerza(){
 		return (super() + self.fuerzaPorRol())/2
@@ -195,11 +195,7 @@ class DefenderSector{
 		gradoAmenaza = gradoAmen
 	}
 	method dificultadPara(empleado){
-		if(empleado.esCiclope()){
-			return gradoAmenaza*2
-		}else{
-			return gradoAmenaza
-		}
+		return gradoAmenaza * empleado.factorMalaPunteria()
 	}
 	method puedeRealizarla(empleado){
 		return empleado.puedeDefender() && empleado.fuerzaMayorA(gradoAmenaza)
